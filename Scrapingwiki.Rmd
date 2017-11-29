@@ -1,0 +1,64 @@
+---
+title: "scrape the HDI"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library('XML')
+library('rvest')
+library('tidyr')
+library('ggplot2')
+library('RCurl')
+library('dplyr')
+library('stringr')
+url<- 'https://en.wikipedia.org/wiki/List_of_countries_by_Human_Development_Index#Complete_list_of_countries'
+appData <- getURL(url, ssl.verifypeer = FALSE)
+doc <- htmlParse(appData)
+appData <- doc['//table[@class="wikitable"]']
+table1 <- readHTMLTable(appData[[1]], stringsAsFactors = F, skip.rows = 1)
+table2 <- readHTMLTable(appData[[2]], stringsAsFactors = F, skip.rows = 1)
+table3 <- readHTMLTable(appData[[3]], stringsAsFactors = F, skip.rows = 1)
+table4 <- readHTMLTable(appData[[4]], stringsAsFactors = F, skip.rows = 1)
+table5 <- readHTMLTable(appData[[5]], stringsAsFactors = F, skip.rows = 1)
+table6 <- readHTMLTable(appData[[6]], stringsAsFactors = F, skip.rows = 1)
+table7 <- readHTMLTable(appData[[7]], stringsAsFactors = F, skip.rows = 1)
+table8 <- readHTMLTable(appData[[8]], stringsAsFactors = F, skip.rows = 1)
+t1<- add_column(table1, V6 = "Very high huaman development", .after= "V3")
+t2<- add_column(table2, V6 = "Very high huaman development", .after= "V3")
+t3<- add_column(table3, V6 = "High huaman development", .after= "V3")
+t4<- add_column(table4, V6 = "High huaman development", .after= "V3")
+t5<- add_column(table5, V6 = "Medium huaman development", .after= "V3")
+t6<- add_column(table6, V6 = "Medium huaman development", .after= "V3")
+t7<- add_column(table7, V6 = "Low huaman development", .after= "V3")
+t8<- add_column(table8, V6 = "Low huaman development", .after= "V3")
+ft<- do.call("rbind",list(t1,t2,t3,t4,t5,t6,t7,t8))
+names(ft)<- c("rank1","rank2","country","HDI categories","HDI","HDI2")
+str(ft)
+ ft %>%
+ select("country","HDI categories", "HDI")
+ ft1<- select(ft, "country","HDI categories", "HDI")
+ ft1$x<- paste(ft1$country, ft1$`HDI categories`)
+ ft2<- select(ft1, "HDI", "x")
+ names(ft2)<- c("country", "HDI categories")
+ ft2
+ write.csv(ft2, file = "ft2.csv")
+ 
+
+
+
+```
+
+
+`
+
+
