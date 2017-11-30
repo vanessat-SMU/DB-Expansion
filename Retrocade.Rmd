@@ -1,0 +1,63 @@
+---
+title: "Retrocade"
+author: "Vanessa Torres"
+date: "11/26/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##D&B-RETROCADE
+
+With over 90 locations of state-of-the-art games, the last 35 years have proven to be 
+
+##Procrastination
+```{r Procrastination}
+p <- read.csv(file="~vanessatorres/Downloads/CaseStudyTwoMaterials/Procrastination.csv", header=TRUE)
+p <- as.data.frame(p)
+p
+```
+
+##Procrastination clean up
+```{r Procrastination clean up}
+p <- as.tibble(p)
+p
+names(p) <- gsub(".", " ", names(p), fixed=TRUE)
+View(p)
+```
+##Procrastination clean up continued
+```{r, Procrastination clean up continued}
+sapply(p, mode)
+p <- purrr::modify_if(p, ~is.numeric(.), ~round(.,0))
+View(p)
+```
+##Procrastination clean up continued - replacing variables in columns Kids and Number of Sons
+```{r, replacing variables in columns Kids and Number of Sons}
+levels(p$Kids)
+levels(p$Kids)[2] <- "No"
+levels(p$Kids)[3] <- "Yes"
+levels(p$`Number of sons`)
+levels(p$`Number of sons`)[9] <- "1"
+levels(p$`Number of sons`)[8] <-"0"
+View(p)
+```
+##Country of Residence - replacing  0 to NA
+```{r, Country of Residence - replacing 0 to NA}
+levels(p$`Country of residence`)
+levels(p$`Country of residence`)[2] <- "NA"
+View(p)
+```
+##Current Occupation - clean up
+```{r, Current Occupation - clean up}
+levels(p$`Current Occupation`)
+levels(p$`Country of residence`)[25] <- "NA"
+View(p)
+levels(p$`Current Occupation`)
+levels(p$`Current Occupation`)[439] <- "NA"
+View(p)
+levels(p$`Current Occupation`)
+levels(p$`Current Occupation`)[439] <- "NA"
+View(p)
+```
