@@ -1,0 +1,217 @@
+---
+author: Annahid Lee
+title: "RcodeT2"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(graphics)
+library(plyr)
+library(foreign)
+library(nnet)
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(XML)
+library(RCurl)
+library(stringr)
+
+
+
+#### 2a
+my_data <- read.csv("~/School/2017-09/MSDS6306/CaseStudyTwoMaterials/Procrastination.csv",header=T,sep=",")
+my_wiki <- read.csv("~/School/2017-09/MSDS6306/ft3.csv", header = T ,sep = ",")
+my_wiki$HDI.categories <- sapply(my_wiki$HDI.categories, as.character)
+#### 2b
+colnames(my_data)[1] <- c('Age')
+
+#### 2c
+#### rapply(my_data,function(x)length(unique(x)))
+str(my_data$How.long.have.you.held.this.position...Years)
+summary(my_data$How.long.have.you.held.this.position...Years)
+summary(my_data$How.long.have.you.held.this.position...Months)
+
+# In order to correct for number of years I was thinking of using number of months but it seems 
+# these fields should be  x years and y months since max(month) is 11. Since this part is judgmental/subjective) from what I can see in the data I can create a function and update the year field. below I put 
+# some stats that can be usefull and some example function but based on stasts I may want to modify it to appear more appropriate values such that all 999 years are transform to mean/median (any meaningful number that can represent my data). 
+
+str(my_data$Work.Status)
+my_data$Work.Status <- sapply(my_data$Work.Status, as.character)
+hist(my_data$Age)
+hist(my_data$How.long.have.you.held.this.position...Years)
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years > 30])
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years == 999])
+
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years > 30 & my_data$Work.Status == 'student'])
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years > 30 & my_data$Work.Status == 'unemployed'])
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years > 30 & my_data$Work.Status == 'full-time'])
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years > 30 & my_data$Work.Status == 'part-time'])
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years > 30 & my_data$Work.Status == 'retired'])
+length(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years > 30 & is.na(my_data$Work.Status)])
+summary(my_data$How.long.have.you.held.this.position...Years[my_data$How.long.have.you.held.this.position...Years !=999])
+summary(my_data$How.long.have.you.held.this.position...Years[my_data$Work.Status == 'full-time' & my_data$How.long.have.you.held.this.position...Years !=999])
+summary(my_data$How.long.have.you.held.this.position...Years[my_data$Work.Status == 'student'])
+summary(my_data$How.long.have.you.held.this.position...Years[my_data$Work.Status == 'student' & my_data$How.long.have.you.held.this.position...Years !=999])
+
+
+  year_correctin <- function(year,age,workStat){
+  if (is.na(year)) {return(year)}
+  else if (year == 999 & (is.na(age) | age < 18) & is.na(workStat)) {return(4)}
+  else if (year == 999 & (is.na(age) | age < 18) & workStat == 'unemployed') {return(3)}
+  else if (year == 999 & (is.na(age) | age < 18) & workStat == 'student') {return(2)}
+  else if (year == 999 & (is.na(age) | age < 18) & workStat == 'full-time') {return(5)}
+  else if (year == 999 & (is.na(age) | age < 18) & workStat == 'retired') {return(4)}
+  else if (year == 999 & (is.na(age) | age < 18) & workStat == 'part-time') {return(4)}
+  else if (year == 999 & age < 31 & is.na(workStat)) {return(2)}
+  else if (year == 999 & age < 31 & workStat == 'unemployed') {return(1)}
+  else if (year == 999 & age < 31 & workStat == 'student') {return(2)}
+  else if (year == 999 & age < 31 & workStat == 'full-time') {return(2)}
+  else if (year == 999 & age < 31 & workStat == 'part-time') {return(1)}
+  else if (year == 999 & age < 31 & workStat == 'retired') {return(1)}
+  else if (year == 999 & (age > 30 & age < 51) & is.na(workStat)) {return(5)}
+  else if (year == 999 & (age > 30 & age < 51) & workStat == 'unemployed') {return(3)}
+  else if (year == 999 & (age > 30 & age < 51) & workStat == 'retired') {return(6)}
+  else if (year == 999 & (age > 30 & age < 51) & workStat == 'student') {return(3)}
+  else if (year == 999 & (age > 30 & age < 51) & workStat == 'full-time') {return(5)}
+  else if (year == 999 & (age > 30 & age < 51) & workStat == 'part-time') {return(5)}
+  else if (year == 999 & (age > 50 & age < 65) & is.na(workStat)) {return(8)}
+  else if (year == 999 & (age > 50 & age < 65) & workStat == 'unemployed') {return(5)}
+  else if (year == 999 & (age > 50 & age < 65) & workStat == 'retired') {return(3)}
+  else if (year == 999 & (age > 50 & age < 65) & workStat == 'student') {return(4)}
+  else if (year == 999 & (age > 50 & age < 65) & workStat == 'full-time') {return(9)}
+  else if (year == 999 & (age > 50 & age < 65) & workStat == 'part-time') {return(6)}
+  else if (year == 999 & age > 64 & is.na(workStat)) {return(2)}
+  else if (year == 999 & age > 64 & workStat == 'unemployed') {return(6)}
+  else if (year == 999 & age > 64 & workStat == 'full-time') {return(12)}
+  else if (year == 999 & age > 64 & workStat == 'part-time') {return(9)}
+  else if (year == 999 & age > 64 & workStat == 'retired') {return(4)}
+  else if (year == 999 & age == 67.5 & workStat == 'student') {return(4)}
+  else if (year < 1) { return(0) }	
+  else {return(year)}
+	}
+
+my_data$How.long.have.you.held.this.position...Years <- mapply(year_correctin, my_data$How.long.have.you.held.this.position...Years, my_data$Age, my_data$Work.Status)
+
+# . 
+# I first changed it to string then replaced the values and converted the field to numeric
+str(my_data$Number.of.sons) 
+my_data$Number.of.sons <- sapply(my_data$Number.of.sons, as.character)
+my_data$Number.of.sons[my_data$Number.of.sons == "Male"] <- "1"
+my_data$Number.of.sons[my_data$Number.of.sons == "Female"] <- "2"
+my_data$Number.of.sons <- sapply(my_data$Number.of.sons, as.numeric)
+summary(my_data$Number.of.sons) 
+
+#  
+# I first changed it to string then replaced the values and converted the field to factor again but you can keep as character
+str(my_data$Country.of.residence) 
+summary(my_data$Country.of.residence) 
+my_data$Country.of.residence <- sapply(my_data$Country.of.residence, as.character)
+my_data$Country.of.residence[my_data$Country.of.residence == "0"] <- NA
+
+#  
+# I first changed it to string then replaced the values and converted the field to factor again but you can keep as character
+str(my_data$Current.Occupation) 
+summary(my_data$Current.Occupation) 
+my_data$Current.Occupation <- sapply(my_data$Current.Occupation, as.character)
+my_data$Current.Occupation[my_data$Current.Occupation == "0" | my_data$Current.Occupation == "" | my_data$Current.Occupation == "please specify"] <- NA
+
+#### 2d
+ my_data$Gender<- sapply(my_data$Gender, as.character)
+ my_data$Kids<- sapply(my_data$Kids, as.character)
+ my_data$Edu<- sapply(my_data$Edu, as.character)
+ my_data$Marital.Status<- sapply(my_data$Marital.Status, as.character)
+ my_data$Marital.Status[my_data$Marital.Status == "0"] <- NA
+ my_data$Community.size<- sapply(my_data$Community.size, as.character)
+ my_data$Community.size[my_data$Community.size =="0" | my_data$Community.size =="8"] <- NA
+ my_data$Kids[my_data$Kids == "Yes Kids"]<- "Yes"
+ my_data$Kids[my_data$Kids == "No Kids"]<- "No"
+ my_data$Do.others.consider.you.a.procrastinator.<- sapply(my_data$Do.others.consider.you.a.procrastinator., as.character)
+ my_data$Do.you.consider.yourself.a.procrastinator.<- sapply(my_data$Do.you.consider.yourself.a.procrastinator., as.character)
+ my_data$Do.others.consider.you.a.procrastinator.[my_data$Do.others.consider.you.a.procrastinator. == "0" | my_data$Do.others.consider.you.a.procrastinator.== "4" ] <- NA
+ 
+ #### 2e
+ my_data$DPMean<- rowMeans(my_data[,15:19])
+ my_data$AIPMean<- rowMeans(my_data[,20:34])
+ my_data$GPMean<- rowMeans(my_data[,35:54])
+ my_data$SWLSMean<- rowMeans(my_data[,55:59])
+ 
+ ####3c merge the ft2 data frame to the country of residence column of Procrastination so that the new data has an HDI and HDI categories
+ my_wiki$country<- sapply(my_wiki$country, as.character)
+ my_wiki<- select(my_wiki, "country", "HDI.categories", "HDI")
+ mg<- merge(my_data,my_wiki, by.x = "Country.of.residence", by.y = "country", all.x = TRUE)
+#### PA 4A
+my_data2<- mg[mg$Age> 18, ]
+#### PA 4B
+pft<- summary(my_data2$Age)
+pft_Income<- summary(my_data2$Annual.Income)
+pft_DP<- summary(my_data2$DPMean)
+pft_GP<- summary(my_data2$GPMean)
+pft_AIP<- summary(my_data2$AIPMean)
+pft_Swl<- summary(my_data2$SWLSMean)
+pft_HDI<- summary(my_data2$HDI)
+pft_all<- do.call("rbind",list(pft,pft_Income,pft_DP,pft_GP,pft_AIP,pft_Swl,pft_HDI))
+row.names(pft_all)<- c("Age", "Income", "MeanDP","MeanGP", "MeanAIP", "MeanSwl", "HDI")
+hist(my_data2$Age)
+hist(my_data2$DPMean)
+##### PA 4C
+ table(my_data2$Gender)
+ table(my_data2$Work.Status)
+ table(my_data2$Current.Occupation)
+##### PA 4d
+data.frame( rev(sort(table(my_data2$Country.of.residence))))
+
+#### PA 4e
+table(my_data2$Do.you.consider.yourself.a.procrastinator., my_data2$Do.others.consider.you.a.procrastinator.)
+
+#### 5B
+test<- data.frame(aggregate(my_data2$DPMean,by=list(Country=my_data2$Country.of.residence),FUN=mean))
+nation<- test[order(-test$x),][0:15,]
+mg1<- merge(nation,my_wiki, by.x = "Country", by.y = "country", all.x = TRUE)
+mg1<- mg1[order(-mg1$x),]
+p<- ggplot(mg1, aes(mg1$Country, mg1$x))
+p+ geom_bar(stat = "identity", aes(fill= mg1$HDI.categories), position = "dodge")+ xlab("nations") + ylab("DPMean") + ggtitle("Top 15 nations by DPMean") +theme_bw() +theme(axis.text.x = element_text(angle = 90, hjust = 1)) +scale_x_discrete(limits=mg1$Country)
+
+### 5C
+test<- data.frame(aggregate(my_data2$AIPMean,by=list(Country=my_data2$Country.of.residence),FUN=mean))
+nation<- test[order(-test$x),][0:15,]
+mg1<- merge(nation,my_wiki, by.x = "Country", by.y = "country", all.x = TRUE)
+mg1<- mg1[order(-mg1$x),]
+p<- ggplot(mg1, aes(mg1$Country, mg1$x))
+p+ geom_bar(stat = "identity", aes(fill= mg1$HDI.categories), position = "dodge")+ xlab("nations") + ylab("AIPMean") + ggtitle("Top 15 nations by AIPMean") +theme_bw() +theme(axis.text.x = element_text(angle = 90, hjust = 1)) +scale_x_discrete(limits=mg1$Country)
+#### 5d
+
+p<- ggplot(my_data2, aes(my_data2$Age, log10(my_data2$Annual.Income)))
+p+ geom_point(stat = "identity", aes(color= my_data2$Gender),  position=position_jitter())+ xlab("Age") + ylab("Income") + ggtitle("Age versus Income") +theme_bw()
+lm(log10(my_data2$Annual.Income)~my_data2$Age)
+##### 5e
+p<- ggplot(my_data2, aes(my_data2$HDI, my_data2$SWLSMean))
+p+ geom_point(stat = "identity", aes(color= my_data2$Gender),  position=position_jitter())+ xlab("HDI") + ylab("Life Satisfction") + ggtitle("HDI versus Life Satisfaction") +theme_bw()
+lm(my_data2$SWLSMean~my_data2$HDI)
+
+p<- ggplot(my_data2, aes(my_data2$HDI.categories,my_data2$SWLSMean))
+p+ geom_bar(stat = "identity", position = "dodge")+ xlab("HDI categories") + ylab("Life Satisfaction") + ggtitle("HDI categories versus Life Satisfaction") +theme_bw() +theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+####### 6 b
+write.csv(my_data2, "Clean_Procrastination.csv", row.names = FALSE)
+####### 6 c
+test<- data.frame(aggregate(my_data2$DPMean,by=list(Country=my_data2$Country.of.residence),FUN=mean))
+nation<- test[order(-test$x),][0:15,]
+mg1<- merge(nation,my_wiki, by.x = "Country", by.y = "country", all.x = TRUE)
+mg1<- mg1[order(-mg1$x),]
+colnames(mg1)[2]<- c('AverageDPMean')
+write.csv(mg1, "Top_15_nations_by_averageDPMean.csv", row.names = FALSE)
+
+test<- data.frame(aggregate(my_data2$AIPMean,by=list(Country=my_data2$Country.of.residence),FUN=mean))
+nation<- test[order(-test$x),][0:15,]
+mg1<- merge(nation,my_wiki, by.x = "Country", by.y = "country", all.x = TRUE)
+mg1<- mg1[order(-mg1$x),]
+colnames(mg1)[2]<- c('AverageAIPMean')
+write.csv(mg1, "Top_15_nations_by_averageAIPMean.csv", row.names = FALSE)
+```
+
