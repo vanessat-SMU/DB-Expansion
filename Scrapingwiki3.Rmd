@@ -44,7 +44,7 @@ str(ft)
  
  ft1<- select(ft, "country","HDI categories", "HDI")
  ###ft1$x<- paste(ft1$country, ft1$`HDI categories`)
- write.csv(ft1, file = "ft3.csv")
+ write.csv(ft1, file = "ft3.csv", row.names=FALSE)
  
 
 
