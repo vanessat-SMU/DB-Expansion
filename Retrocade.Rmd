@@ -105,3 +105,6 @@ names(p3) <-c("Gender", "Work Status", "Current Occupation")
 View(p3)
 count(p3, 'Gender')
 ```
+Also, before I get carried away with our Human Development Index data, I wanted to show you all mock up of D&B's Retrocade Logo
+DB-Retrocade/Screenshot 2017-11-26 07.47.47.png
+
