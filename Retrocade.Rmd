@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 With over 90 locations of state-of-the-art games, the last 35 years have proven to be a success for both owners David Corriveau and James "Buster" Corley. As the popular chain continues to expand throughout North America, David has brought forth the idea to James about possibly opening up a few "urban, boutique-style" arcades in cities that are growing or are geared towards the young professional population. When David reached out to Vannahid, LLC and pitched his idea to us, we decided to take this project with an entirely different approach. Rather than focusing our research on properties or the night life, we decided to look at the level of procrastination an area or town had to offer.  We figured if these boutiques are going to offer "retro-cades" and are going to geared to specific population, we need to attract those individuals that put off their holiday shopping or take a few hours away from writing their graduate thesis and would go to a place that offered them nostalgic creativity and stimulation. 
 
+
+
 ##Procrastination
 ```{r Procrastination}
 p <- read.csv(file="~vanessatorres/Downloads/CaseStudyTwoMaterials/Procrastination.csv", header=TRUE)
