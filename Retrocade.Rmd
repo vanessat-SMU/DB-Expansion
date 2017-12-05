@@ -13,6 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 With over 90 locations of state-of-the-art games, the last 35 years have proven to be a success for both owners David Corriveau and James "Buster" Corley. As the popular chain continues to expand throughout North America, David has brought forth the idea to James about possibly opening up a few "urban, boutique-style" arcades in cities that are growing or are geared towards the young professional population. When David reached out to Vannahid, LLC and pitched his idea to us, we decided to take this project with an entirely different approach. Rather than focusing our research on properties or the night life, we decided to look at the level of procrastination an area or town had to offer.  We figured if these boutiques are going to offer "retro-cades" and are going to geared to specific population, we need to attract those individuals that put off their holiday shopping or take a few hours away from writing their graduate thesis and would go to a place that offered them nostalgic creativity and stimulation. 
 
+In efforts to provide you all with the most accurate procrastination data, we utilized the data set from the study, originated by Qualtrics.  Though before we continue with this meeting, I really would like to give an extra shout-out to my partner and this firm's COO, Annahid Lee, because she really was the powerhouse behind this concept. 
+
+As I briefly mentioned, we used Qualtrics' data set because they had over 4000 observations and 65 exploratory variables that afforded us with our amazing perspective. 
 
 
 ##Procrastination
@@ -21,6 +24,7 @@ p <- read.csv(file="~vanessatorres/Downloads/CaseStudyTwoMaterials/Procrastinati
 p <- as.data.frame(p)
 p
 ```
+Naturally when we pulled the data, we had to clean it up a bit but just knowing the level of questions and surveys that were used by McCown & Johnson in 1989 is very much relatable today.
 
 ##Procrastination clean up
 ```{r Procrastination clean up}
@@ -75,6 +79,7 @@ p$SWLSmean <- NA
 p$SWLSmean <-rowMeans(p[55:59], na.rm=TRUE)
 View(p)
 ```
+Right here, we went ahead and removed any of the participants that were under the age of 18.  We wanted to stay true to D&B's Retrocade philosophy and maitain our focus gearing towards the "young & urban professionals."
 ```{r }
 p <-p[-c(30,42,50,51,76,84,96,97,99,100,120,176,180,232,278,279,297,330,341,342,352,362,370,376,377,400,411,460,500,621,660,703,799,817,825,826,834,836,848,856,862,876,880,895,909,934,959,992,995,1020,1036,1092,1097,1101,1111,1160,1189,1211,1233,1315,1345,1361,1555,1558,1563,1637,1709,1719,1735,1750,1777,1785,1805,1821,1829,1834,1874,1924,2023,2036,2043,2046,2051,2054,2056,2064,2065,2066,2069,2070,2074,2080,2081,2085,2086,2090,2105,2109,2111,2112,2118,2120,2121,2124,2129,2130,2132,2136,2137,2138,2139,2140,2141,2148,2155,2211,2296,2297,2306,2314,2345,2349,2367,2399,2438,2486,2503,2507,2510,2511,2538,2539,2540,2573,2577,2583,2595,2605,2612,2621,2629,2646,2648,2659,2667,2669,2687,2697,2700,2718,2754,2776,2778,2791,2797,2799,2817,2825,2833,2853,2892,2900,2909,2910,2911,2912,2913,2914,2915,2919,2920,2921,2926,2927,2930,2931,2935,2936,2937,2938,2940,2945,2948,2949,2951,2952,2953,2954,2956,2960,2968,2969,2970,2976,2979,2984,2985,2987,2990,2991,2996,3034,3080,3197,3200,3301,3454,3527,3656,3658), ]
 View(p)
